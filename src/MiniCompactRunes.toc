@@ -2,7 +2,7 @@
 ## Title: MiniCompactRunes
 ## Notes: Tracks runic power and rune cooldowns in a simple display.
 ## Author: Verz
-## Version: 1.1.0
+## Version: 1.1.1
 ## IconTexture: Interface\AddOns\MiniCompactRunes\Icon.blp
 ## SavedVariables: MiniCompactRunesDB
 ## X-Curse-Project-ID: 1418878
