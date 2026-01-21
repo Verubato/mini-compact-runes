@@ -1,5 +1,6 @@
-local addonName = ...
-local loader
+local _, addon = ...
+---@type MiniFramework
+local mini = addon.Framework
 local eventFrame
 local draggable
 local runicPowerBar
@@ -7,36 +8,8 @@ local runicPowerText
 local runeBars = {}
 local runeContainer
 local timer
+---@type Db
 local db
-local dbDefaults = {
-	-- parent frame config
-	Point = "BOTTOM",
-	RelativePoint = "BOTTOM",
-	X = 0,
-	Y = 200,
-	Scale = 1.0,
-	Width = 120,
-
-	-- visibility settings
-	ShowOutOfCombat = true,
-	CombatAlpha = 1.0,
-	OutOfCombatAlpha = 0.3,
-
-	-- runic power bar config
-	RunicPowerHeight = 20,
-	RunicPowerGap = 6,
-	ShowText = true,
-
-	-- rune grid layout
-	RuneRows = 3,
-	RuneColumns = 2,
-	RuneGap = 3,
-	RuneHeight = 20,
-
-	RuneCooldownRed = 0.2,
-	RuneCooldownGreen = 0.6,
-	RuneCooldownBlue = 1.0,
-}
 
 local function IsDeathKnight()
 	local _, classTag = UnitClass("player")
@@ -133,16 +106,14 @@ end
 local function Layout()
 	local width = db.Width
 	local rpHeight = db.RunicPowerHeight
-	local gap = db.RuneGap
+	local gap = db.Gap
 	local rows = db.RuneRows
 	local cols = db.RuneColumns
 	local runeHeight = db.RuneHeight
-	local betweenGap = db.RunicPowerGap
-
 	local gridHeight = rows * runeHeight + (rows - 1) * gap
 	local runeWidth = (width - gap * (cols - 1)) / cols
 
-	local totalHeight = gridHeight + betweenGap + rpHeight
+	local totalHeight = gridHeight + gap + rpHeight
 	draggable:SetSize(width, totalHeight)
 
 	-- RP bar at bottom
@@ -155,8 +126,8 @@ local function Layout()
 	runeContainer:ClearAllPoints()
 	runeContainer:SetPoint("TOPLEFT", draggable, "TOPLEFT", 0, 0)
 	runeContainer:SetPoint("TOPRIGHT", draggable, "TOPRIGHT", 0, 0)
-	runeContainer:SetPoint("BOTTOMLEFT", runicPowerBar, "TOPLEFT", 0, betweenGap)
-	runeContainer:SetPoint("BOTTOMRIGHT", runicPowerBar, "TOPRIGHT", 0, betweenGap)
+	runeContainer:SetPoint("BOTTOMLEFT", runicPowerBar, "TOPLEFT", 0, gap)
+	runeContainer:SetPoint("BOTTOMRIGHT", runicPowerBar, "TOPRIGHT", 0, gap)
 
 	-- Place rune bars starting at the top left
 	for i = 1, 6 do
@@ -316,14 +287,6 @@ local function EnsureRuneTimer()
 	end)
 end
 
-local function ApplyDefaults(src, defaults)
-	for k, v in pairs(defaults) do
-		if src[k] == nil then
-			src[k] = v
-		end
-	end
-end
-
 local function UpdateBar()
 	local cur, max = GetRunicPower()
 	runicPowerBar:SetMinMaxValues(0, max)
@@ -337,21 +300,33 @@ local function UpdateBar()
 	end
 end
 
-local function ApplyConfig()
-	draggable:ClearAllPoints()
-	draggable:SetPoint(db.Point, UIParent, db.RelativePoint, db.X, db.Y)
-	draggable:SetScale(db.Scale or 1.0)
+local function OnEvent(_, event)
+	if event == "PLAYER_REGEN_DISABLED" or event == "PLAYER_REGEN_ENABLED" then
+		UpdateVisibility()
+		return
+	end
 
-	Layout()
-	UpdateVisibility()
+	if event == "RUNE_POWER_UPDATE" or event == "RUNE_TYPE_UPDATE" then
+		UpdateRunes()
+		EnsureRuneTimer()
+		return
+	end
+
+	UpdateBar()
+
+	if event == "PLAYER_ENTERING_WORLD" or event == "PLAYER_SPECIALIZATION_CHANGED" then
+		UpdateRunes()
+		EnsureRuneTimer()
+	end
 end
 
-local function Load()
-	MiniCompactRunesDB = MiniCompactRunesDB or {}
+local function Init()
+	if not IsDeathKnight() then
+		return
+	end
 
-	ApplyDefaults(MiniCompactRunesDB, dbDefaults)
-
-	db = MiniCompactRunesDB
+	addon.Config:Init()
+	db = mini:GetSavedVars()
 
 	draggable = CreateDraggable()
 	runicPowerBar, runicPowerText = CreateRunicPowerBar()
@@ -363,7 +338,12 @@ local function Load()
 		runeBars[i] = CreateRuneBar(runeContainer)
 	end
 
-	ApplyConfig()
+	draggable:ClearAllPoints()
+	draggable:SetPoint(db.Point, UIParent, db.RelativePoint, db.X, db.Y)
+	draggable:SetScale(db.Scale or 1.0)
+
+	Layout()
+	UpdateVisibility()
 	UpdateBar()
 	UpdateRunes()
 
@@ -384,39 +364,12 @@ local function Load()
 	eventFrame:RegisterEvent("PLAYER_REGEN_DISABLED")
 	eventFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
 
-	eventFrame:SetScript("OnEvent", function(_, event)
-		if event == "PLAYER_REGEN_DISABLED" or event == "PLAYER_REGEN_ENABLED" then
-			UpdateVisibility()
-			return
-		end
-
-		if event == "RUNE_POWER_UPDATE" or event == "RUNE_TYPE_UPDATE" then
-			UpdateRunes()
-			EnsureRuneTimer()
-			return
-		end
-
-		UpdateBar()
-
-		if event == "PLAYER_ENTERING_WORLD" or event == "PLAYER_SPECIALIZATION_CHANGED" then
-			UpdateRunes()
-			EnsureRuneTimer()
-		end
-	end)
+	eventFrame:SetScript("OnEvent", OnEvent)
 end
 
-loader = CreateFrame("Frame")
-loader:RegisterEvent("ADDON_LOADED")
-loader:SetScript("OnEvent", function(_, _, ...)
-	local name = ...
+function addon:Refresh()
+	Layout()
+	UpdateVisibility()
+end
 
-	if name ~= addonName then
-		return
-	end
-
-	if not IsDeathKnight() then
-		return
-	end
-
-	Load()
-end)
+mini:WaitForAddonLoad(Init)
