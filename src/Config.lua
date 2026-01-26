@@ -156,6 +156,24 @@ function M:Init()
 
 	runicPowerHeightSlider.Slider:SetPoint("TOPLEFT", widthSlider.Slider, "BOTTOMLEFT", 0, -verticalSpacing * 3)
 
+	local runesWidthSlider = mini:Slider({
+		Parent = panel,
+		LabelText = "Runes Width",
+		Min = 10,
+		Max = 200,
+		Step = 1,
+		Width = sliderWidth,
+		GetValue = function()
+			return db.RuneWidth
+		end,
+		SetValue = function(value)
+			db.RuneWidth = mini:ClampInt(value, 10, 200, dbDefaults.RuneWidth)
+			addon:Refresh()
+		end,
+	})
+
+	runesWidthSlider.Slider:SetPoint("TOPLEFT", runicPowerHeightSlider.Slider, "BOTTOMLEFT", 0, -verticalSpacing * 3)
+
 	local runesHeightSlider = mini:Slider({
 		Parent = panel,
 		LabelText = "Runes Height",
@@ -172,7 +190,7 @@ function M:Init()
 		end,
 	})
 
-	runesHeightSlider.Slider:SetPoint("TOPLEFT", runicPowerHeightSlider.Slider, "BOTTOMLEFT", 0, -verticalSpacing * 3)
+	runesHeightSlider.Slider:SetPoint("TOPLEFT", runesWidthSlider.Slider, "BOTTOMLEFT", 0, -verticalSpacing * 3)
 
 	local powerGapSlider = mini:Slider({
 		Parent = panel,
