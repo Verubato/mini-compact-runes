@@ -129,25 +129,25 @@ function M:Init()
 	showText:SetPoint("LEFT", panel, "LEFT", columnWidth, 0)
 
 	local sliderWidth = (columns / 2 * columnWidth) - horizontalSpacing
-	local widthSlider = mini:Slider({
+	local rpWidthSlider = mini:Slider({
 		Parent = panel,
 		LabelText = "Power Width",
 		Min = 50,
-		Max = 500,
+		Max = 800,
 		Step = 10,
 		Width = sliderWidth,
 		GetValue = function()
 			return db.RunicPowerWidth
 		end,
 		SetValue = function(value)
-			db.RunicPowerWidth = mini:ClampInt(value, 50, 500, dbDefaults.RunicPowerWidth)
+			db.RunicPowerWidth = mini:ClampInt(value, 50, 800, dbDefaults.RunicPowerWidth)
 			addon:Refresh()
 		end,
 	})
 
-	widthSlider.Slider:SetPoint("TOPLEFT", alwaysShow, "BOTTOMLEFT", 0, -verticalSpacing * 3)
+	rpWidthSlider.Slider:SetPoint("TOPLEFT", alwaysShow, "BOTTOMLEFT", 0, -verticalSpacing * 3)
 
-	local runicPowerHeightSlider = mini:Slider({
+	local rpHeightSlider = mini:Slider({
 		Parent = panel,
 		LabelText = "Power Height",
 		Min = 10,
@@ -163,25 +163,25 @@ function M:Init()
 		end,
 	})
 
-	runicPowerHeightSlider.Slider:SetPoint("LEFT", widthSlider.Slider, "RIGHT", horizontalSpacing, 0)
+	rpHeightSlider.Slider:SetPoint("LEFT", rpWidthSlider.Slider, "RIGHT", horizontalSpacing, 0)
 
 	local runesWidthSlider = mini:Slider({
 		Parent = panel,
 		LabelText = "Runes Width",
 		Min = 10,
-		Max = 200,
+		Max = 300,
 		Step = 1,
 		Width = sliderWidth,
 		GetValue = function()
 			return db.RuneWidth
 		end,
 		SetValue = function(value)
-			db.RuneWidth = mini:ClampInt(value, 10, 200, dbDefaults.RuneWidth)
+			db.RuneWidth = mini:ClampInt(value, 10, 300, dbDefaults.RuneWidth)
 			addon:Refresh()
 		end,
 	})
 
-	runesWidthSlider.Slider:SetPoint("TOPLEFT", widthSlider.Slider, "BOTTOMLEFT", 0, -verticalSpacing * 3)
+	runesWidthSlider.Slider:SetPoint("TOPLEFT", rpWidthSlider.Slider, "BOTTOMLEFT", 0, -verticalSpacing * 3)
 
 	local runesHeightSlider = mini:Slider({
 		Parent = panel,
@@ -205,14 +205,14 @@ function M:Init()
 		Parent = panel,
 		LabelText = "Power Gap",
 		Min = 0,
-		Max = 20,
+		Max = 50,
 		Step = 1,
 		Width = sliderWidth,
 		GetValue = function()
 			return db.RunicPowerGap
 		end,
 		SetValue = function(value)
-			db.RunicPowerGap = mini:ClampInt(value, 0, 20, dbDefaults.RunicPowerGap)
+			db.RunicPowerGap = mini:ClampInt(value, 0, 50, dbDefaults.RunicPowerGap)
 			addon:Refresh()
 		end,
 	})
