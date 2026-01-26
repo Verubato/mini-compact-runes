@@ -198,9 +198,20 @@ local function GetRuneRemaining(now, runeId)
 	return remaining, start, duration, false
 end
 
+---Returns the column of a given rune slot.
+---e.g. in a 2x3 grid, slots 123456 becomes 135246
+local function RuneSlot(slot, rows, cols)
+	local k = slot - 1
+	local row = k % rows
+	local col = math.floor(k / rows)
+	return row * cols + col + 1
+end
+
 local function UpdateRunes()
 	local now = GetTime()
 	local r, g, b = GetRuneColorBySpec()
+	local rows = db.RuneRows
+	local cols = db.RuneColumns
 
 	-- Build list of rune states
 	local runes = {}
@@ -215,19 +226,11 @@ local function UpdateRunes()
 		}
 	end
 
-	-- Sort by least remaining first
-	table.sort(runes, function(a, b2)
-		if a.remaining ~= b2.remaining then
-			return a.remaining < b2.remaining
-		end
-
-		return a.id < b2.id
-	end)
-
-	-- Paint the 6 UI bars in that order
+	-- Paint the 6 UI bars in column order
 	for slot = 1, 6 do
 		local state = runes[slot]
-		local bar = runeBars[slot]
+		local barIndex = RuneSlot(slot, rows, cols)
+		local bar = runeBars[barIndex]
 
 		if state.ready or not state.duration or state.duration <= 0 then
 			bar:SetMinMaxValues(0, 1)
