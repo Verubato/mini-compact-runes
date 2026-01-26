@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.1
+
+Fixed rune cooldown to start from bottom right and grow up then left.
+
 ## 2.0.0
 
 - Changed the order that runes cooldown from row based to column based.
