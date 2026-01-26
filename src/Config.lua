@@ -118,8 +118,7 @@ function M:Init()
 	showText:SetPoint("TOP", alwaysShow, "TOP", 0, 0)
 	showText:SetPoint("LEFT", panel, "LEFT", columnWidth, 0)
 
-	local sliderWidth = (columns * columnWidth) - horizontalSpacing
-
+	local sliderWidth = (columns / 2 * columnWidth) - horizontalSpacing
 	local widthSlider = mini:Slider({
 		Parent = panel,
 		LabelText = "Power Width",
@@ -154,7 +153,7 @@ function M:Init()
 		end,
 	})
 
-	runicPowerHeightSlider.Slider:SetPoint("TOPLEFT", widthSlider.Slider, "BOTTOMLEFT", 0, -verticalSpacing * 3)
+	runicPowerHeightSlider.Slider:SetPoint("LEFT", widthSlider.Slider, "RIGHT", horizontalSpacing, 0)
 
 	local runesWidthSlider = mini:Slider({
 		Parent = panel,
@@ -172,7 +171,7 @@ function M:Init()
 		end,
 	})
 
-	runesWidthSlider.Slider:SetPoint("TOPLEFT", runicPowerHeightSlider.Slider, "BOTTOMLEFT", 0, -verticalSpacing * 3)
+	runesWidthSlider.Slider:SetPoint("TOPLEFT", widthSlider.Slider, "BOTTOMLEFT", 0, -verticalSpacing * 3)
 
 	local runesHeightSlider = mini:Slider({
 		Parent = panel,
@@ -190,7 +189,7 @@ function M:Init()
 		end,
 	})
 
-	runesHeightSlider.Slider:SetPoint("TOPLEFT", runesWidthSlider.Slider, "BOTTOMLEFT", 0, -verticalSpacing * 3)
+	runesHeightSlider.Slider:SetPoint("LEFT", runesWidthSlider.Slider, "RIGHT", horizontalSpacing, 0)
 
 	local powerGapSlider = mini:Slider({
 		Parent = panel,
@@ -208,7 +207,7 @@ function M:Init()
 		end,
 	})
 
-	powerGapSlider.Slider:SetPoint("TOPLEFT", runesHeightSlider.Slider, "BOTTOMLEFT", 0, -verticalSpacing * 3)
+	powerGapSlider.Slider:SetPoint("TOPLEFT", runesWidthSlider.Slider, "BOTTOMLEFT", 0, -verticalSpacing * 3)
 
 	local gapSlider = mini:Slider({
 		Parent = panel,
@@ -226,5 +225,24 @@ function M:Init()
 		end,
 	})
 
-	gapSlider.Slider:SetPoint("TOPLEFT", powerGapSlider.Slider, "BOTTOMLEFT", 0, -verticalSpacing * 3)
+	gapSlider.Slider:SetPoint("LEFT", powerGapSlider.Slider, "RIGHT", horizontalSpacing, 0)
+
+	local columnsSlider = mini:Slider({
+		Parent = panel,
+		LabelText = "Columns",
+		Min = 1,
+		Max = 3,
+		Step = 1,
+		Width = sliderWidth,
+		GetValue = function()
+			return db.RuneColumns
+		end,
+		SetValue = function(value)
+			db.RuneColumns = mini:ClampInt(value, 1, 3, dbDefaults.RuneColumns)
+			db.RuneRows = 6 / db.RuneColumns
+			addon:Refresh()
+		end,
+	})
+
+	columnsSlider.Slider:SetPoint("TOPLEFT", powerGapSlider.Slider, "BOTTOMLEFT", 0, -verticalSpacing * 3)
 end
