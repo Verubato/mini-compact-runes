@@ -5,29 +5,33 @@ local mini = addon.Framework
 local db
 ---@class Db
 local dbDefaults = {
+	Version = 2,
+
 	-- parent frame config
 	Point = "BOTTOM",
 	RelativePoint = "BOTTOM",
 	X = 0,
 	Y = 200,
 	Scale = 1.0,
-	Width = 120,
 
 	-- visibility settings
 	ShowOutOfCombat = true,
 	CombatAlpha = 1.0,
 	OutOfCombatAlpha = 0.3,
 
-	Gap = 6,
+	ShowText = true,
 
 	-- runic power bar config
+	RunicPowerWidth = 120,
 	RunicPowerHeight = 20,
-	ShowText = true,
+	RunicPowerGap = 0,
 
 	-- rune grid layout
 	RuneRows = 3,
 	RuneColumns = 2,
+	RuneWidth = 120,
 	RuneHeight = 20,
+	RunesGap = 6,
 
 	RuneCooldownRed = 0.2,
 	RuneCooldownGreen = 0.6,
@@ -39,9 +43,22 @@ local M = {
 
 addon.Config = M
 
+local function GetAndUpdateDb()
+	local vars = mini:GetSavedVars(dbDefaults)
+	mini:CleanTable(vars, dbDefaults, true, false)
+
+	if not vars.Version or vars.Version == 1 then
+		vars.RunicPowerWidth = vars.Width
+		vars.RuneWidth = vars.Width / 2
+		vars.RunesGap = vars.Gap
+		vars.Version = 2
+	end
+
+	return vars
+end
+
 function M:Init()
-	db = mini:GetSavedVars(dbDefaults)
-	mini:CleanTable(db, dbDefaults, true, false)
+	db = GetAndUpdateDb()
 
 	local panel = CreateFrame("Frame")
 	panel.name = addonName
@@ -105,16 +122,16 @@ function M:Init()
 
 	local widthSlider = mini:Slider({
 		Parent = panel,
-		LabelText = "Width",
+		LabelText = "Power Width",
 		Min = 50,
 		Max = 500,
 		Step = 10,
 		Width = sliderWidth,
 		GetValue = function()
-			return db.Width
+			return db.RunicPowerWidth
 		end,
 		SetValue = function(value)
-			db.Width = mini:ClampInt(value, 50, 500, dbDefaults.Width)
+			db.RunicPowerWidth = mini:ClampInt(value, 50, 500, dbDefaults.RunicPowerWidth)
 			addon:Refresh()
 		end,
 	})
@@ -157,21 +174,39 @@ function M:Init()
 
 	runesHeightSlider.Slider:SetPoint("TOPLEFT", runicPowerHeightSlider.Slider, "BOTTOMLEFT", 0, -verticalSpacing * 3)
 
-	local gapSlider = mini:Slider({
+	local powerGapSlider = mini:Slider({
 		Parent = panel,
-		LabelText = "Gap/Padding",
+		LabelText = "Power Gap",
 		Min = 0,
 		Max = 20,
 		Step = 1,
 		Width = sliderWidth,
 		GetValue = function()
-			return db.Gap
+			return db.RunicPowerGap
 		end,
 		SetValue = function(value)
-			db.Gap = mini:ClampInt(value, 0, 20, dbDefaults.Gap)
+			db.RunicPowerGap = mini:ClampInt(value, 0, 20, dbDefaults.RunicPowerGap)
 			addon:Refresh()
 		end,
 	})
 
-	gapSlider.Slider:SetPoint("TOPLEFT", runesHeightSlider.Slider, "BOTTOMLEFT", 0, -verticalSpacing * 3)
+	powerGapSlider.Slider:SetPoint("TOPLEFT", runesHeightSlider.Slider, "BOTTOMLEFT", 0, -verticalSpacing * 3)
+
+	local gapSlider = mini:Slider({
+		Parent = panel,
+		LabelText = "Runes Gap",
+		Min = 0,
+		Max = 20,
+		Step = 1,
+		Width = sliderWidth,
+		GetValue = function()
+			return db.RunesGap
+		end,
+		SetValue = function(value)
+			db.RunesGap = mini:ClampInt(value, 0, 20, dbDefaults.RunesGap)
+			addon:Refresh()
+		end,
+	})
+
+	gapSlider.Slider:SetPoint("TOPLEFT", powerGapSlider.Slider, "BOTTOMLEFT", 0, -verticalSpacing * 3)
 end

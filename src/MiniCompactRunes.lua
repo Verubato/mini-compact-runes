@@ -1,4 +1,4 @@
-local _, addon = ...
+local addonName, addon = ...
 ---@type MiniFramework
 local mini = addon.Framework
 local eventFrame
@@ -18,8 +18,8 @@ end
 
 local function AddBlackOutline(frame)
 	local outline = CreateFrame("Frame", nil, frame, "BackdropTemplate")
-	outline:SetPoint("TOPLEFT", frame, -1, 1)
-	outline:SetPoint("BOTTOMRIGHT", frame, 1, -1)
+	outline:SetPoint("TOPLEFT", frame, 0, 0)
+	outline:SetPoint("BOTTOMRIGHT", frame, 0, 0)
 
 	outline:SetBackdrop({
 		edgeFile = "Interface\\Buttons\\WHITE8X8",
@@ -30,11 +30,15 @@ local function AddBlackOutline(frame)
 end
 
 local function CreateDraggable()
-	local frame = CreateFrame("Frame", nil, UIParent)
+	local frame = CreateFrame("Frame", addonName .. "Container", UIParent)
 	frame:SetClampedToScreen(true)
 	frame:EnableMouse(true)
 	frame:SetMovable(true)
 	frame:RegisterForDrag("LeftButton")
+
+	if frame.SetDontSavePosition then
+		frame:SetDontSavePosition(true)
+	end
 
 	frame:SetScript("OnDragStart", function(self)
 		self:StartMoving()
@@ -104,30 +108,31 @@ local function CreateRuneBar(container)
 end
 
 local function Layout()
-	local width = db.Width
-	local rpHeight = db.RunicPowerHeight
-	local gap = db.Gap
 	local rows = db.RuneRows
 	local cols = db.RuneColumns
 	local runeHeight = db.RuneHeight
-	local gridHeight = rows * runeHeight + (rows - 1) * gap
-	local runeWidth = (width - gap * (cols - 1)) / cols
+	local runeWidth = db.RuneWidth
+	local runeGap = db.RunesGap
+	local rpWidth = db.RunicPowerWidth
+	local rpHeight = db.RunicPowerHeight
+	local rpGap = db.RunicPowerGap
+	local gridHeight = rows * runeHeight + (rows - 1) * runeGap
+	local gridWidth = cols * runeWidth + (cols - 1) * runeGap
+	local totalHeight = gridHeight + rpGap + rpHeight
+	local totalWidth = math.max(rpWidth, gridWidth)
 
-	local totalHeight = gridHeight + gap + rpHeight
-	draggable:SetSize(width, totalHeight)
+	draggable:SetSize(totalWidth, totalHeight)
 
-	-- RP bar at bottom
+	-- power bar at bottom
 	runicPowerBar:ClearAllPoints()
-	runicPowerBar:SetPoint("BOTTOMLEFT", draggable, "BOTTOMLEFT", 0, 0)
-	runicPowerBar:SetPoint("BOTTOMRIGHT", draggable, "BOTTOMRIGHT", 0, 0)
-	runicPowerBar:SetHeight(rpHeight)
+	runicPowerBar:SetPoint("BOTTOM", draggable, "BOTTOM", 0, 0)
+	runicPowerBar:SetSize(rpWidth, rpHeight)
 
-	-- Rune container surrounding everything
+	-- runes container
 	runeContainer:ClearAllPoints()
-	runeContainer:SetPoint("TOPLEFT", draggable, "TOPLEFT", 0, 0)
-	runeContainer:SetPoint("TOPRIGHT", draggable, "TOPRIGHT", 0, 0)
-	runeContainer:SetPoint("BOTTOMLEFT", runicPowerBar, "TOPLEFT", 0, gap)
-	runeContainer:SetPoint("BOTTOMRIGHT", runicPowerBar, "TOPRIGHT", 0, gap)
+	runeContainer:SetPoint("TOP", draggable, "TOP", 0, 0)
+	runeContainer:SetPoint("BOTTOM", runicPowerBar, "TOP", 0, rpGap)
+	runeContainer:SetWidth(gridWidth)
 
 	-- Place rune bars starting at the top left
 	for i = 1, 6 do
@@ -137,7 +142,7 @@ local function Layout()
 
 		local b = runeBars[i]
 		b:ClearAllPoints()
-		b:SetPoint("TOPLEFT", runeContainer, "TOPLEFT", col * (runeWidth + gap), -row * (runeHeight + gap))
+		b:SetPoint("TOPLEFT", runeContainer, "TOPLEFT", col * (runeWidth + runeGap), -row * (runeHeight + runeGap))
 		b:SetSize(runeWidth, runeHeight)
 	end
 end
