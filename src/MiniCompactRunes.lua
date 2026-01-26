@@ -8,6 +8,7 @@ local runicPowerText
 local runeBars = {}
 local runeContainer
 local timer
+local runesCount = 6
 ---@type Db
 local db
 
@@ -134,11 +135,11 @@ local function Layout()
 	runeContainer:SetPoint("BOTTOM", runicPowerBar, "TOP", 0, rpGap)
 	runeContainer:SetWidth(gridWidth)
 
-	-- Place rune bars starting at the top left
-	for i = 1, 6 do
+	-- place runes in column order (fill down then across)
+	for i = 1, runesCount do
 		local idx = i - 1
-		local row = math.floor(idx / cols)
-		local col = idx % cols
+		local col = math.floor(idx / rows)
+		local row = idx % rows
 
 		local b = runeBars[i]
 		b:ClearAllPoints()
@@ -203,24 +204,13 @@ local function GetRuneRemaining(now, runeId)
 	return remaining, start, duration, false
 end
 
----Returns the column of a given rune slot.
----e.g. in a 2x3 grid, slots 123456 becomes 135246
-local function RuneSlot(slot, rows, cols)
-	local k = slot - 1
-	local row = k % rows
-	local col = math.floor(k / rows)
-	return row * cols + col + 1
-end
-
 local function UpdateRunes()
 	local now = GetTime()
 	local r, g, b = GetRuneColorBySpec()
-	local rows = db.RuneRows
-	local cols = db.RuneColumns
 
 	-- Build list of rune states
 	local runes = {}
-	for runeId = 1, 6 do
+	for runeId = 1, runesCount do
 		local remaining, start, duration, ready = GetRuneRemaining(now, runeId)
 		runes[#runes + 1] = {
 			id = runeId,
@@ -231,11 +221,22 @@ local function UpdateRunes()
 		}
 	end
 
-	-- Paint the 6 UI bars in column order
-	for slot = 1, 6 do
+	-- sort by remaining
+	table.sort(runes, function(x, y)
+		if not x then
+			return false
+		elseif not y then
+			return true
+		end
+
+		return (x.remaining < y.remaining)
+	end)
+
+	-- Paint the 6 UI bars in reverse column order
+	-- so our runes are 123456, but we paint their cooldowns in 654321
+	for slot = 1, runesCount do
 		local state = runes[slot]
-		local barIndex = RuneSlot(slot, rows, cols)
-		local bar = runeBars[barIndex]
+		local bar = runeBars[slot]
 
 		if state.ready or not state.duration or state.duration <= 0 then
 			bar:SetMinMaxValues(0, 1)
@@ -255,7 +256,7 @@ local function UpdateRunes()
 end
 
 local function AnyRuneCoolingDown()
-	for i = 1, 6 do
+	for i = 1, runesCount do
 		local _, duration, ready = GetRuneCooldown(i)
 		if ready == false and duration and duration > 0 then
 			return true
@@ -342,7 +343,7 @@ local function Init()
 	runeContainer = CreateFrame("Frame", nil, draggable)
 	runeContainer:EnableMouse(false)
 
-	for i = 1, 6 do
+	for i = 1, runesCount do
 		runeBars[i] = CreateRuneBar(runeContainer)
 	end
 
