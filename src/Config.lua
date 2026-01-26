@@ -44,15 +44,25 @@ local M = {
 addon.Config = M
 
 local function GetAndUpdateDb()
-	local vars = mini:GetSavedVars(dbDefaults)
-	mini:CleanTable(vars, dbDefaults, true, false)
+	local isFirstInit = MiniCompactRunesDB == nil
+	local vars
+
+	if isFirstInit then
+		vars = mini:GetSavedVars(dbDefaults)
+	else
+		-- get a copy without db defaults applied, as we don't want to automatically place a version on it yet
+		vars = mini:GetSavedVars()
+	end
 
 	if not vars.Version or vars.Version == 1 then
 		vars.RunicPowerWidth = vars.Width
 		vars.RuneWidth = vars.Width / 2
 		vars.RunesGap = vars.Gap
 		vars.Version = 2
+		mini:CleanTable(vars, dbDefaults, true, false)
 	end
+
+	vars = mini:GetSavedVars(dbDefaults)
 
 	return vars
 end
