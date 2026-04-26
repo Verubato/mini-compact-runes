@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.1.0
+
+Added Locked option.
+
 ## 2.0.1
 
 Fixed rune cooldown to start from bottom right and grow up then left.
