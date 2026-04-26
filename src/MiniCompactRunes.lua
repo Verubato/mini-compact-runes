@@ -148,6 +148,12 @@ local function Layout()
 	end
 end
 
+local function ApplyLock()
+	local locked = db.Locked
+	draggable:EnableMouse(not locked)
+	draggable:SetMovable(not locked)
+end
+
 local function UpdateVisibility()
 	local inCombat = UnitAffectingCombat("player")
 	local alpha = inCombat and (db.CombatAlpha or 1.0) or (db.OutOfCombatAlpha or 0.3)
@@ -352,6 +358,7 @@ local function Init()
 	draggable:SetScale(db.Scale or 1.0)
 
 	Layout()
+	ApplyLock()
 	UpdateVisibility()
 	UpdateBar()
 	UpdateRunes()
@@ -378,6 +385,7 @@ end
 
 function addon:Refresh()
 	Layout()
+	ApplyLock()
 	UpdateVisibility()
 end
 

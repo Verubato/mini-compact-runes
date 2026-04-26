@@ -14,6 +14,8 @@ local dbDefaults = {
 	Y = 200,
 	Scale = 1.0,
 
+	Locked = false,
+
 	-- visibility settings
 	ShowOutOfCombat = true,
 	CombatAlpha = 1.0,
@@ -127,6 +129,21 @@ function M:Init()
 
 	showText:SetPoint("TOP", alwaysShow, "TOP", 0, 0)
 	showText:SetPoint("LEFT", panel, "LEFT", columnWidth, 0)
+
+	local lockFrame = mini:Checkbox({
+		Parent = panel,
+		LabelText = "Locked",
+		GetValue = function()
+			return db.Locked
+		end,
+		SetValue = function(value)
+			db.Locked = value
+			addon:Refresh()
+		end,
+	})
+
+	lockFrame:SetPoint("TOP", alwaysShow, "TOP", 0, 0)
+	lockFrame:SetPoint("LEFT", panel, "LEFT", columnWidth * 2, 0)
 
 	local sliderWidth = (columns / 2 * columnWidth) - horizontalSpacing
 	local rpWidthSlider = mini:Slider({
