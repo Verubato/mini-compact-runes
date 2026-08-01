@@ -7,6 +7,6 @@
 ## SavedVariables: MiniCompactRunesDB
 ## X-Curse-Project-ID: 1418878
 
-MiniFramework.lua
+Libs\MiniFramework\MiniFramework.xml
 Config.lua
 MiniCompactRunes.lua

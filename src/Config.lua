@@ -86,14 +86,11 @@ function M:Init()
 	local columns = 4
 	local columnWidth = mini:ColumnWidth(columns, 0, 0)
 
-	local version = C_AddOns.GetAddOnMetadata(addonName, "Version")
-	local title = panel:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
-	title:SetPoint("TOPLEFT", 0, -verticalSpacing)
-	title:SetText(string.format("%s - %s", addonName, version))
-
-	local subtitle = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
-	subtitle:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -6)
-	subtitle:SetText("Runes and runic power tracker.")
+	local header = mini:PanelHeader({
+		Parent = panel,
+		Description = "Runes and runic power tracker.",
+		Gap = 6,
+	})
 
 	mini:RegisterSlashCommand(category, panel, {
 		"/minicompactrunes",
@@ -113,7 +110,7 @@ function M:Init()
 		end,
 	})
 
-	alwaysShow:SetPoint("TOPLEFT", subtitle, "BOTTOMLEFT", 0, -verticalSpacing)
+	alwaysShow:SetPoint("TOPLEFT", header.Anchor, "BOTTOMLEFT", 0, -verticalSpacing)
 
 	local showText = mini:Checkbox({
 		Parent = panel,
