@@ -1,4 +1,4 @@
-## Interface: 120100, 120005, 50504, 40402, 38000, 30405
+## Interface: 120100, 120007, 120005, 50504, 40402, 38002, 38000, 30405
 ## Title: MiniCompactRunes
 ## Notes: Tracks runic power and rune cooldowns in a simple display.
 ## Author: Verz
