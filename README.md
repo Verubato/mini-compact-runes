@@ -12,9 +12,9 @@ Feedback and feature requests are more than welcome!
 
 ## Screenshots
 
-![MiniCompactRunes screenshot](https://media.forgecdn.net/attachments/1496/352/screenshot-png.png)
+![MiniCompactRunes screenshot](https://raw.githubusercontent.com/Verubato/mini-compact-runes/main/assets/Screenshot.png)
 
-![MiniCompactRunes screenshot](https://media.forgecdn.net/attachments/1495/269/screenshot-settings-png.png)
+![MiniCompactRunes screenshot](https://raw.githubusercontent.com/Verubato/mini-compact-runes/main/assets/ScreenshotSettings.png)
 
 ## Download
 
