@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.2.6
+
+Reduced CPU use: the bars no longer redraw for other units' power ticks or for power types other than runic power, and the rune update no longer allocates on every pass.
+
 ## 2.2.5
 
 Added a Mini category so the addon groups with the other Mini addons in the addon list.

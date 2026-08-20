@@ -14,7 +14,7 @@ display is created and no options panel is registered.
 
 | Item | Value |
 | --- | --- |
-| Version | 2.2.4 |
+| Version | 2.2.6 |
 | Author | Verz |
 | Interface versions (TOC) | 120100, 50504, 40402, 38002, 38000, 30405 |
 | Saved variables | MiniCompactRunesDB |
