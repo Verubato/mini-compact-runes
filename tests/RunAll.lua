@@ -11,6 +11,8 @@ io.write("MiniCompactRunes - unit tests\n")
 io.write("======================================\n")
 
 local testFiles = {
+	"tests/TestRuneColor.lua",
+	-- Last: the smoke test installs a clean client over whatever the suites above left.
 	"tests/TestSmoke.lua",
 }
 

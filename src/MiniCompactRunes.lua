@@ -15,6 +15,10 @@ local runeStates = {}
 -- The spec color, and the spec it was read for. The color only moves when the player respecs.
 local runeColorR, runeColorG, runeColorB
 local runeColorSpec
+-- Drawn on a ready rune until the client can say which spec the player is. A DK who has not
+-- picked one, and the first moments of a login, both land here; white reads as a fault rather
+-- than a colour, so this matches how a bar is drawn before anything paints it.
+local defaultRuneR, defaultRuneG, defaultRuneB = 0.2, 0.9, 0.2
 ---@type Db
 local db
 
@@ -102,7 +106,7 @@ local function CreateRuneBar(container)
 	bar:SetValue(1)
 
 	-- simple coloring: ready = bright, cooling = dim
-	bar:SetStatusBarColor(0.2, 0.9, 0.2, 1.0)
+	bar:SetStatusBarColor(defaultRuneR, defaultRuneG, defaultRuneB, 1.0)
 
 	local bg = bar:CreateTexture(nil, "BACKGROUND")
 	bg:SetAllPoints()
@@ -173,19 +177,43 @@ local function UpdateVisibility()
 	end
 end
 
----@return number? r nil when the spec is not known yet
+-- 12.1 moved the specialization functions onto C_SpecializationInfo and the globals stopped
+-- answering, which left every rune painted the fallback color. The classic clients this addon
+-- also supports only have the globals, so both shapes are tried.
+
+---@return number? specIndex
+local function GetPlayerSpecIndex()
+	if C_SpecializationInfo and C_SpecializationInfo.GetSpecialization then
+		return C_SpecializationInfo.GetSpecialization()
+	end
+
+	if GetSpecialization then
+		return GetSpecialization()
+	end
+
+	return nil
+end
+
+---@return number? specId
+local function GetPlayerSpecId(specIndex)
+	if C_SpecializationInfo and C_SpecializationInfo.GetSpecializationInfo then
+		return (C_SpecializationInfo.GetSpecializationInfo(specIndex))
+	end
+
+	if GetSpecializationInfo then
+		return (GetSpecializationInfo(specIndex))
+	end
+
+	return nil
+end
+
+---@return number? r nil unless the spec is one this addon has a color for
 local function ReadRuneColorBySpec(specIndex)
 	if not specIndex then
 		return nil
 	end
 
-	local specId = GetSpecializationInfo(specIndex)
-
-	-- Early in login the index can resolve before its info does. Answering nil keeps that
-	-- from being cached as the fallback for the rest of the session.
-	if not specId then
-		return nil
-	end
+	local specId = GetPlayerSpecId(specIndex)
 
 	-- Blood
 	if specId == 250 then
@@ -200,25 +228,27 @@ local function ReadRuneColorBySpec(specIndex)
 		return 0.2, 0.8, 0.2
 	end
 
-	-- fallback (should never happen)
-	return 1, 1, 1
+	-- No color to give: the info is not ready yet, or this client reports the id in a shape
+	-- the branches above do not recognise. Either way there is nothing worth remembering.
+	return nil
 end
 
 local function GetRuneColorBySpec()
-	local specIndex = GetSpecialization()
+	local specIndex = GetPlayerSpecIndex()
 
 	-- Keyed on the spec rather than refreshed by event, so a respec is picked up on the next
 	-- pass whether or not the event announcing it reached this file.
 	if specIndex ~= runeColorSpec or runeColorR == nil then
 		local r, g, b = ReadRuneColorBySpec(specIndex)
 
-		if r then
-			runeColorSpec = specIndex
-			runeColorR, runeColorG, runeColorB = r, g, b
-		else
-			-- Nothing to remember yet, so the next pass asks again.
-			return 1, 1, 1
+		-- Only a real answer is cached. Remembering the fallback would hold the wrong color
+		-- for the rest of the session, because the index it was read for does not change.
+		if not r then
+			return defaultRuneR, defaultRuneG, defaultRuneB
 		end
+
+		runeColorSpec = specIndex
+		runeColorR, runeColorG, runeColorB = r, g, b
 	end
 
 	return runeColorR, runeColorG, runeColorB
