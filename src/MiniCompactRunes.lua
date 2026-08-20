@@ -9,6 +9,12 @@ local runeBars = {}
 local runeContainer
 local timer
 local runesCount = 6
+-- Rune state, reused across passes. UpdateRunes runs ten times a second for as long as any
+-- rune is recharging, so the six entries are refilled rather than rebuilt.
+local runeStates = {}
+-- The spec color, and the spec it was read for. The color only moves when the player respecs.
+local runeColorR, runeColorG, runeColorB
+local runeColorSpec
 ---@type Db
 local db
 
@@ -167,14 +173,19 @@ local function UpdateVisibility()
 	end
 end
 
-local function GetRuneColorBySpec()
-	local specIndex = GetSpecialization()
-
+---@return number? r nil when the spec is not known yet
+local function ReadRuneColorBySpec(specIndex)
 	if not specIndex then
-		return 1, 1, 1
+		return nil
 	end
 
 	local specId = GetSpecializationInfo(specIndex)
+
+	-- Early in login the index can resolve before its info does. Answering nil keeps that
+	-- from being cached as the fallback for the rest of the session.
+	if not specId then
+		return nil
+	end
 
 	-- Blood
 	if specId == 250 then
@@ -191,6 +202,26 @@ local function GetRuneColorBySpec()
 
 	-- fallback (should never happen)
 	return 1, 1, 1
+end
+
+local function GetRuneColorBySpec()
+	local specIndex = GetSpecialization()
+
+	-- Keyed on the spec rather than refreshed by event, so a respec is picked up on the next
+	-- pass whether or not the event announcing it reached this file.
+	if specIndex ~= runeColorSpec or runeColorR == nil then
+		local r, g, b = ReadRuneColorBySpec(specIndex)
+
+		if r then
+			runeColorSpec = specIndex
+			runeColorR, runeColorG, runeColorB = r, g, b
+		else
+			-- Nothing to remember yet, so the next pass asks again.
+			return 1, 1, 1
+		end
+	end
+
+	return runeColorR, runeColorG, runeColorB
 end
 
 local function GetRuneRemaining(now, runeId)
@@ -210,38 +241,39 @@ local function GetRuneRemaining(now, runeId)
 	return remaining, start, duration, false
 end
 
+---Orders rune states by how much of their cooldown is left. Kept out of UpdateRunes because an
+---inline comparator is a fresh closure per sort, and this one sorts ten times a second.
+local function ByRemaining(x, y)
+	return (x.remaining < y.remaining)
+end
+
 local function UpdateRunes()
 	local now = GetTime()
 	local r, g, b = GetRuneColorBySpec()
 
-	-- Build list of rune states
-	local runes = {}
+	-- Refilled in place; table.sort then reorders the same six entries.
 	for runeId = 1, runesCount do
 		local remaining, start, duration, ready = GetRuneRemaining(now, runeId)
-		runes[#runes + 1] = {
-			id = runeId,
-			remaining = remaining,
-			start = start,
-			duration = duration,
-			ready = ready,
-		}
-	end
+		local state = runeStates[runeId]
 
-	-- sort by remaining
-	table.sort(runes, function(x, y)
-		if not x then
-			return false
-		elseif not y then
-			return true
+		if not state then
+			state = {}
+			runeStates[runeId] = state
 		end
 
-		return (x.remaining < y.remaining)
-	end)
+		state.id = runeId
+		state.remaining = remaining
+		state.start = start
+		state.duration = duration
+		state.ready = ready
+	end
+
+	table.sort(runeStates, ByRemaining)
 
 	-- Paint the 6 UI bars in reverse column order
 	-- so our runes are 123456, but we paint their cooldowns in 654321
 	for slot = 1, runesCount do
-		local state = runes[slot]
+		local state = runeStates[slot]
 		local bar = runeBars[slot]
 
 		if state.ready or not state.duration or state.duration <= 0 then
@@ -315,7 +347,7 @@ local function UpdateBar()
 	end
 end
 
-local function OnEvent(_, event)
+local function OnEvent(_, event, _, powerType)
 	if event == "PLAYER_REGEN_DISABLED" or event == "PLAYER_REGEN_ENABLED" then
 		UpdateVisibility()
 		return
@@ -324,6 +356,12 @@ local function OnEvent(_, event)
 	if event == "RUNE_POWER_UPDATE" or event == "RUNE_TYPE_UPDATE" then
 		UpdateRunes()
 		EnsureRuneTimer()
+		return
+	end
+
+	-- The power events cover every power type the player has, and an energy tick has nothing
+	-- to say about a runic power bar.
+	if event == "UNIT_POWER_UPDATE" and powerType ~= "RUNIC_POWER" then
 		return
 	end
 
@@ -368,9 +406,10 @@ local function Init()
 	eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
 	eventFrame:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
 
-	-- runic power
-	eventFrame:RegisterEvent("UNIT_POWER_UPDATE")
-	eventFrame:RegisterEvent("UNIT_DISPLAYPOWER")
+	-- runic power. Unit filtered, or every nearby unit's energy and mana ticks land here too
+	-- and each one repaints the player's bar.
+	eventFrame:RegisterUnitEvent("UNIT_POWER_UPDATE", "player")
+	eventFrame:RegisterUnitEvent("UNIT_DISPLAYPOWER", "player")
 
 	-- rune events
 	eventFrame:RegisterEvent("RUNE_POWER_UPDATE")
