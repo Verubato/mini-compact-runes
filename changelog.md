@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.2.7
+
+Fixed ready runes showing white instead of their spec colour on 12.1, which moved the specialization functions the addon reads.
+
 ## 2.2.6
 
 Reduced CPU use: the bars no longer redraw for other units' power ticks or for power types other than runic power, and the rune update no longer allocates on every pass.
