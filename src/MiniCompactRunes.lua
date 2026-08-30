@@ -27,6 +27,8 @@ local function IsDeathKnight()
 	return classTag == "DEATHKNIGHT"
 end
 
+addon.IsDeathKnight = IsDeathKnight()
+
 local function AddBlackOutline(frame)
 	local outline = CreateFrame("Frame", nil, frame, "BackdropTemplate")
 	outline:SetPoint("TOPLEFT", frame, 0, 0)
@@ -404,11 +406,14 @@ local function OnEvent(_, event, _, powerType)
 end
 
 local function Init()
-	if not IsDeathKnight() then
+	addon.Config:Init()
+
+	-- The options page is built for every class so the addon shows up in the settings list;
+	-- only the rune display itself is a death knight thing.
+	if not addon.IsDeathKnight then
 		return
 	end
 
-	addon.Config:Init()
 	db = mini:GetSavedVars()
 
 	draggable = CreateDraggable()
@@ -453,6 +458,12 @@ local function Init()
 end
 
 function addon:Refresh()
+	-- Never created for a class other than death knight, so a settings change from that
+	-- panel has nothing to lay out.
+	if not draggable then
+		return
+	end
+
 	Layout()
 	ApplyLock()
 	UpdateVisibility()
