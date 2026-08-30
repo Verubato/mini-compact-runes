@@ -93,6 +93,13 @@ function M:Init()
 		Parent = panel,
 		Description = "Runes and runic power tracker.",
 		Gap = 6,
+		Divider = true,
+		Reset = {
+			OnAccept = function()
+				mini:ResetSavedVars(dbDefaults)
+				addon:Refresh()
+			end,
+		},
 	})
 
 	mini:RegisterSlashCommand(category, panel, {
