@@ -158,7 +158,7 @@ function M:Init()
 	})
 
 	sizeDivider:SetPoint("LEFT", panel)
-	sizeDivider:SetPoint("RIGHT", panel, 0, 0)
+	sizeDivider:SetPoint("RIGHT", panel, "RIGHT", 0, 0)
 	sizeDivider:SetPoint("TOP", lockFrame, "BOTTOM", 0, -verticalSpacing)
 
 	local sliderWidth = (columns / 2 * columnWidth) - horizontalSpacing
@@ -240,7 +240,7 @@ function M:Init()
 	})
 
 	spacingDivider:SetPoint("LEFT", panel)
-	spacingDivider:SetPoint("RIGHT", panel, 0, 0)
+	spacingDivider:SetPoint("RIGHT", panel, "RIGHT", 0, 0)
 	spacingDivider:SetPoint("TOP", runesWidthSlider.Slider, "BOTTOM", 0, -verticalSpacing)
 
 	local powerGapSlider = mini:Slider({
