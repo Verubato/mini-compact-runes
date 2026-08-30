@@ -70,6 +70,9 @@ local function GetAndUpdateDb()
 end
 
 function M:Init()
+	-- A styled button clashes with the stock Blizzard art around it in the settings screen.
+	mini:SetCustomStyling(true, { Button = false })
+
 	db = GetAndUpdateDb()
 
 	local panel = CreateFrame("Frame")
@@ -142,6 +145,15 @@ function M:Init()
 	lockFrame:SetPoint("TOP", alwaysShow, "TOP", 0, 0)
 	lockFrame:SetPoint("LEFT", panel, "LEFT", columnWidth * 2, 0)
 
+	local sizeDivider = mini:Divider({
+		Parent = panel,
+		Text = "Size",
+	})
+
+	sizeDivider:SetPoint("LEFT", panel)
+	sizeDivider:SetPoint("RIGHT", panel, -horizontalSpacing, 0)
+	sizeDivider:SetPoint("TOP", lockFrame, "BOTTOM", 0, -verticalSpacing)
+
 	local sliderWidth = (columns / 2 * columnWidth) - horizontalSpacing
 	local rpWidthSlider = mini:Slider({
 		Parent = panel,
@@ -159,7 +171,7 @@ function M:Init()
 		end,
 	})
 
-	rpWidthSlider.Slider:SetPoint("TOPLEFT", alwaysShow, "BOTTOMLEFT", 0, -verticalSpacing * 3)
+	rpWidthSlider.Slider:SetPoint("TOPLEFT", sizeDivider, "BOTTOMLEFT", 0, -verticalSpacing * 3)
 
 	local rpHeightSlider = mini:Slider({
 		Parent = panel,
@@ -215,6 +227,15 @@ function M:Init()
 
 	runesHeightSlider.Slider:SetPoint("LEFT", runesWidthSlider.Slider, "RIGHT", horizontalSpacing, 0)
 
+	local spacingDivider = mini:Divider({
+		Parent = panel,
+		Text = "Spacing",
+	})
+
+	spacingDivider:SetPoint("LEFT", panel)
+	spacingDivider:SetPoint("RIGHT", panel, -horizontalSpacing, 0)
+	spacingDivider:SetPoint("TOP", runesWidthSlider.Slider, "BOTTOM", 0, -verticalSpacing)
+
 	local powerGapSlider = mini:Slider({
 		Parent = panel,
 		LabelText = "Power Gap",
@@ -231,7 +252,7 @@ function M:Init()
 		end,
 	})
 
-	powerGapSlider.Slider:SetPoint("TOPLEFT", runesWidthSlider.Slider, "BOTTOMLEFT", 0, -verticalSpacing * 3)
+	powerGapSlider.Slider:SetPoint("TOPLEFT", spacingDivider, "BOTTOMLEFT", 0, -verticalSpacing * 3)
 
 	local gapSlider = mini:Slider({
 		Parent = panel,
