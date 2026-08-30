@@ -464,6 +464,10 @@ function addon:Refresh()
 		return
 	end
 
+	-- The reset restores the default anchor, and nothing else re-applies it.
+	draggable:ClearAllPoints()
+	draggable:SetPoint(db.Point, UIParent, db.RelativePoint, db.X, db.Y)
+
 	Layout()
 	ApplyLock()
 	UpdateVisibility()

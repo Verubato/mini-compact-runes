@@ -80,5 +80,28 @@ smoke.Run("MiniCompactRunes", {
 
 		fw.eq(db.RunicPowerWidth, context.Addon.Config.DbDefaults.RunicPowerWidth, "reset restored RunicPowerWidth")
 		fw.eq(db.ShowOutOfCombat, context.Addon.Config.DbDefaults.ShowOutOfCombat, "reset restored ShowOutOfCombat")
+
+		local displayFrame = _G["MiniCompactRunesContainer"]
+		local defaults = context.Addon.Config.DbDefaults
+
+		fw.not_nil(displayFrame, "the display frame exists")
+
+		displayFrame:ClearAllPoints()
+		displayFrame:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 350, -75)
+		db.Point = "TOPLEFT"
+		db.RelativePoint = "TOPLEFT"
+		db.X = 350
+		db.Y = -75
+
+		AcceptConfirm(function()
+			resetBtn:Click()
+		end)
+
+		local point, _, relativePoint, x, y = displayFrame:GetPoint(1)
+
+		fw.eq(x, defaults.X, "reset put the display back at its default x")
+		fw.eq(y, defaults.Y, "reset put the display back at its default y")
+		fw.eq(point, defaults.Point, "reset put the display back on its default anchor point")
+		fw.eq(relativePoint, defaults.RelativePoint, "reset put the display back on its default relative point")
 	end,
 })
