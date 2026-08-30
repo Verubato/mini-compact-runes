@@ -7,8 +7,10 @@ bar at the bottom with a grid of 6 rune bars above it. Intended to sit near the
 center of the screen so runes and runic power can be watched without looking at the
 player frame.
 
-The addon is Death Knight only. On any other class it does nothing at all: no
-display is created and no options panel is registered.
+The settings panel is built for every class, so the addon always shows up in
+the AddOns list. The rune display itself stays Death Knight only: on any other
+class the panel exists but no display is ever created, so its checkboxes and
+sliders have nothing to affect.
 
 ## Facts
 
@@ -53,7 +55,10 @@ display is created and no options panel is registered.
 
 ## Settings
 
-Single options panel, opened with /mcr or via Game options -> AddOns.
+Single options panel, opened with /mcr or via Game options -> AddOns, built the
+same way for every class. Its header carries a **Reset to Defaults** button,
+which asks for confirmation and also moves the display back to its default
+screen position.
 
 | Setting | Type | Default | Range | Effect |
 | --- | --- | --- | --- | --- |
@@ -79,8 +84,8 @@ These exist in MiniCompactRunesDB but have no options-panel control:
 | OutOfCombatAlpha | 0.3 | Opacity while out of combat (when "Always show" is on). |
 | RuneCooldownRed / Green / Blue | 0.2 / 0.6 / 1.0 | Fill color of runes that are on cooldown. |
 
-There is no in-UI reset button; settings live in the MiniCompactRunesDB saved
-variable.
+These have no options-panel control, so the Reset to Defaults button is the
+only way to restore them from the UI.
 
 ## Version-gated behavior
 
@@ -93,8 +98,8 @@ variable.
 
 | Symptom | Likely cause |
 | --- | --- |
-| Nothing shows at all | Character is not a Death Knight. The addon is completely inert (no display, no options panel) on other classes. |
-| Addon missing from the AddOns options list | Same cause: it only registers its panel on a Death Knight. |
+| Nothing shows at all | Character is not a Death Knight. The settings panel still exists, but no display is ever created outside that class. |
+| Addon missing from the AddOns options list | Not expected on any class: the settings panel is built for every class now. |
 | Display is faint / semi-transparent | You are out of combat; out-of-combat alpha defaults to 0.3. It returns to full opacity in combat. |
 | Display disappears out of combat | "Always show" is unchecked. |
 | Cannot drag the display | "Locked" is checked, or the display is currently hidden (out of combat with "Always show" off). |

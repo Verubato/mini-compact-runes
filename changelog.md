@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.2.8
+
+- UI improvements.
+- The settings page now opens for every class.
+- Fixed reset not moving the display back.
+
 ## 2.2.7
 
 Fixed ready runes showing white instead of their spec colour on 12.1, which moved the specialization functions the addon reads.
