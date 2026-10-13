@@ -16,9 +16,9 @@ sliders have nothing to affect.
 
 | Item | Value |
 | --- | --- |
-| Version | 2.2.7 |
+| Version | 2.2.9 |
 | Author | Verz |
-| Interface versions (TOC) | 120100, 50504, 40402, 38002, 38000, 30405 |
+| Interface versions (TOC) | 120105, 120100, 50504, 40402, 38002, 38000, 30405 |
 | Saved variables | MiniCompactRunesDB |
 | Slash commands | /minicompactrunes, /minicr, /mcr (all open the settings panel) |
 | Options location | Game options -> AddOns -> MiniCompactRunes |

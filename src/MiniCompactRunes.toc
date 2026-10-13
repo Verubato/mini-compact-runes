@@ -1,9 +1,9 @@
-## Interface: 120100, 50504, 40402, 38002, 38000, 30405
+## Interface: 120105, 120100, 50504, 40402, 38002, 38000, 30405
 ## Title: MiniCompactRunes
 ## Notes: Tracks runic power and rune cooldowns in a simple display.
 ## Category: Mini
 ## Author: Verz
-## Version: 2.2.8
+## Version: 2.2.9
 ## IconTexture: Interface\AddOns\MiniCompactRunes\Icon.blp
 ## SavedVariables: MiniCompactRunesDB
 ## X-Curse-Project-ID: 1418878
